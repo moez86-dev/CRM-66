@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة علاقات العملاء (CRM)</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 50%; /* تصغير حجم الكونتينر */
+            background-color: #64b7b3; /* لون الخلفية */
+            border: 1px solid #250d71; /* لون الحدود */
+            border-radius: 10px; /* زاوية دائرية للكونتينر */
+            padding: 20px; /* مساحة داخلية */
+            box-shadow: 0 4px 8px rgba(144, 191, 181, 0.1); /* ظل الكونتينر */
+        }
+        .form-control, .form-control select, .form-control textarea {
+            direction: rtl;
+        }
+        .table th, .table td {
+            text-align: right;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">نظام إدارة علاقات العملاء (CRM)</h1>
+        <button id="exportExcelBtn" class="btn btn-success btn-sm mb-4">تصدير إلى إكسيل</button>
+        <button id="viewReportBtn" class="btn btn-primary btn-sm mb-4">عرض التقرير</button>
+        <form id="crmForm" class="p-4 mb-4 border rounded shadow-sm bg-light text-right">
+            <h4 class="mb-3">إدخال بيانات العميل</h4>
+            <div class="form-group">
+                <label for="clientName">اسم العميل</label>
+                <input type="text" id="clientName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="contactPerson">مسئول التواصل</label>
+                <input type="text" id="contactPerson" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="contactNumber">رقم التواصل</label>
+                <input type="text" id="contactNumber" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="receivedDate">وقت استلام الرقم</label>
+                <input type="datetime-local" id="receivedDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="firstContactDate">وقت أول تواصل</label>
+                <input type="datetime-local" id="firstContactDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="contactMethod">طريقة التواصل</label>
+                <select id="contactMethod" class="form-control" required>
+                    <option value="">اختر...</option>
+                    <option value="اتصال هاتفي">اتصال هاتفي</option>
+                    <option value="زيارة ميدانية">زيارة ميدانية</option>
+                    <option value="تواصل واتس آب">تواصل واتس آب</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="clientSource">مصدر العميل</label>
+                <select id="clientSource" class="form-control" required>
+                    <option value="">اختر...</option>
+                    <option value="ميداني">ميداني</option>
+                    <option value="رقم إدارة">رقم إدارة</option>
+                    <option value="رقم شخصي">رقم شخصي</option>
+                    <option value="حملة تسويقية">حملة تسويقية</option>
+                    <option value="مسوق خارجي">مسوق خارجي</option>
+                    <option value="غير ذلك">غير ذلك</option>
+                </select>
+                <input type="text" id="clientSourceDetails" class="form-control mt-2" placeholder="يرجى التوضيح" style="display: none;">
+                <div id="fieldVisitDetails" style="display: none;">
+                    <input type="text" id="location" class="form-control mt-2" placeholder="ادراج الموقع">
+                    <input type="text" id="manualInput" class="form-control mt-2" placeholder="تم تعبئته يدوياً">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="interestLevel">مهتم/غير مهتم</label>
+                <select id="interestLevel" class="form-control" required>
+                    <option value="">اختر...</option>
+                    <option value="مهتم">مهتم</option>
+                    <option value="غير مهتم">غير مهتم</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="communicationResult">نتيجة التواصل</label>
+                <select id="communicationResult" class="form-control" required>
+                    <option value="">اختر...</option>
+                    <option value="تواصل مبدئي">تواصل مبدئي</option>
+                    <option value="عرض سعر">عرض سعر</option>
+                    <option value="اشتراك">اشتراك</option>
+                    <option value="شراء">شراء</option>
+                    <option value="متابعة">متابعة</option>
+                    <option value="غير ذلك">غير ذلك</option>
+                </select>
+                <input type="text" id="communicationResultDetails" class="form-control mt-2" placeholder="يرجى التوضيح" style="display: none;">
+            </div>
+            <div class="form-group">
+                <label for="dealClosed">تم إغلاق الصفقة؟</label>
+                <select id="dealClosed" class="form-control" required>
+                    <option value="">اختر...</option>
+                    <option value="نعم">نعم</option>
+                    <option value="لا">لا</option>
+                </select>
+            </div>
+            <div class="form-group" id="dealClosedDateContainer" style="display: none;">
+                <label for="dealClosedDate">تاريخ إغلاق الصفقة</label>
+                <input type="date" id="dealClosedDate" class="form-control">
+            </div>
+            <div class="form-group" id="reasonContainer" style="display: none;">
+                <label for="reason">سبب عدم إغلاق الصفقة</label>
+                <input type="text" id="reason" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="notes">ملاحظات</label>
+                <textarea id="notes" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="salesRep">اسم المندوب</label>
+                <input type="text" id="salesRep" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="employeeCode">الكود الوظيفي</label>
+                <input type="text" id="employeeCode" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="branch">الفرع</label>
+                <input type="text" id="branch" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">إضافة العميل</button>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered my-4">
+                <thead>
+                    <tr class="table-primary">
+                        <th>اسم العميل</th>
+                        <th>مسئول التواصل</th>
+                        <th>رقم التواصل</th>
+                        <th>وقت استلام الرقم</th>
+                        <th>وقت أول تواصل</th>
+                        <th>طريقة التواصل</th>
+                        <th>مصدر العميل</th>
+                        <th>مهتم/غير مهتم</th>
+                        <th>نتيجة التواصل</th>
+                        <th>تم إغلاق الصفقة؟</th>
+                        <th>تاريخ إغلاق الصفقة</th>
+                        <th>سبب عدم إغلاق الصفقة</th>
+                        <th>ملاحظات</th>
+                        <th>اسم المندوب</th>
+                        <th>الكود الوظيفي</th>
+                        <th>الفرع</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="clientList">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const crmForm = document.getElementById('crmForm');
+            const clientSource = document.getElementById('clientSource');
+            const clientSourceDetails = document.getElementById('clientSourceDetails');
+            const fieldVisitDetails = document.getElementById('fieldVisitDetails');
+            const communicationResult = document.getElementById('communicationResult');
+            const communicationResultDetails = document.getElementById('communicationResultDetails');
+            const dealClosed = document.getElementById('dealClosed');
+            const dealClosedDateContainer = document.getElementById('dealClosedDateContainer');
+            const reasonContainer = document.getElementById('reasonContainer');
+            const clientList = document.getElementById('clientList');
+            let clients = JSON.parse(localStorage.getItem('clients')) || [];
+
+            const renderClients = () => {
+                clientList.innerHTML = '';
+                clients.forEach((client, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${client.clientName}</td>
+                        <td>${client.contactPerson}</td>
+                        <td>${client.contactNumber}</td>
+                        <td>${client.receivedDate}</td>
+                        <td>${client.firstContactDate}</td>
+                        <td>${client.contactMethod}</td>
+                        <td>${client.clientSource}</td>
+                        <td>${client.interestLevel}</td>
+                        <td>${client.communicationResult}</td>
+                        <td>${client.dealClosed}</td>
+                        <td>${client.dealClosedDate || ''}</td>
+                        <td>${client.reason || ''}</td>
+                        <td>${client.notes}</td>
+                        <td>${client.salesRep}</td>
+                        <td>${client.employeeCode}</td>
+                        <td>${client.branch}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger deleteClientBtn" data-index="${index}">حذف</button>
+                            <button class="btn btn-sm btn-warning editClientBtn" data-index="${index}">تعديل</button>
+                        </td>
+                    `;
+                    clientList.appendChild(row);
+                });
+            };
+
+            crmForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const newClient = {
+                    clientName: document.getElementById('clientName').value,
+                    contactPerson: document.getElementById('contactPerson').value,
+                    contactNumber: document.getElementById('contactNumber').value,
+                    receivedDate: document.getElementById('receivedDate').value,
+                    firstContactDate: document.getElementById('firstContactDate').value,
+                    contactMethod: document.getElementById('contactMethod').value,
+                    clientSource: document.getElementById('clientSource').value,
+                    location: document.getElementById('location').value, // إضافة الموقع
+                    manualInput: document.getElementById('manualInput').value, // إضافة التعبئة اليدوية
+                    interestLevel: document.getElementById('interestLevel').value,
+                    communicationResult: document.getElementById('communicationResult').value,
+                    dealClosed: document.getElementById('dealClosed').value,
+                    dealClosedDate: document.getElementById('dealClosedDate').value,
+                    reason: document.getElementById('reason').value,
+                    notes: document.getElementById('notes').value,
+                    salesRep: document.getElementById('salesRep').value,
+                    employeeCode: document.getElementById('employeeCode').value,
+                    branch: document.getElementById('branch').value
+                };
+                clients.push(newClient);
+                localStorage.setItem('clients', JSON.stringify(clients));
+                renderClients();
+                crmForm.reset();
+                fieldVisitDetails.style.display = 'none'; // إخفاء التفاصيل بعد الإضافة
+                clientSourceDetails.style.display = 'none'; // إخفاء التفاصيل بعد الإضافة
+            });
+
+            clientSource.addEventListener('change', function() {
+                if (clientSource.value === 'غير ذلك') {
+                    clientSourceDetails.style.display = 'block';
+                    fieldVisitDetails.style.display = 'none'; // إخفاء حقول الميداني عند اختيار غير ذلك
+                } else if (clientSource.value === 'ميداني') {
+                    fieldVisitDetails.style.display = 'block';
+                    clientSourceDetails.style.display = 'none'; // إخفاء التفاصيل عند اختيار ميداني
+                } else {
+                    clientSourceDetails.style.display = 'none';
+                    fieldVisitDetails.style.display = 'none';
+                }
+            });
+
+            communicationResult.addEventListener('change', function() {
+                if (communicationResult.value === 'غير ذلك') {
+                    communicationResultDetails.style.display = 'block';
+                } else {
+                    communicationResultDetails.style.display = 'none';
+                }
+            });
+
+            dealClosed.addEventListener('change', function() {
+                if (dealClosed.value === 'نعم') {
+                    dealClosedDateContainer.style.display = 'block';
+                    reasonContainer.style.display = 'none';
+                } else {
+                    dealClosedDateContainer.style.display = 'none';
+                    reasonContainer.style.display = 'block';
+                }
+            });
+
+            clientList.addEventListener('click', function(event) {
+                if (event.target.classList.contains('deleteClientBtn')) {
+                    const index = event.target.dataset.index;
+                    clients.splice(index, 1);
+                    localStorage.setItem('clients', JSON.stringify(clients));
+                    renderClients();
+                } else if (event.target.classList.contains('editClientBtn')) {
+                    const index = event.target.dataset.index;
+                    const client = clients[index];
+                    document.getElementById('clientName').value = client.clientName;
+                    document.getElementById('contactPerson').value = client.contactPerson;
+                    document.getElementById('contactNumber').value = client.contactNumber;
+                    document.getElementById('receivedDate').value = client.receivedDate;
+                    document.getElementById('firstContactDate').value = client.firstContactDate;
+                    document.getElementById('contactMethod').value = client.contactMethod;
+                    document.getElementById('clientSource').value = client.clientSource;
+                    document.getElementById('location').value = client.location; // تعبئة الموقع
+                    document.getElementById('manualInput').value = client.manualInput; // تعبئة التعبئة اليدوية
+                    document.getElementById('interestLevel').value = client.interestLevel;
+                    document.getElementById('communicationResult').value = client.communicationResult;
+                    document.getElementById('dealClosed').value = client.dealClosed;
+                    document.getElementById('dealClosedDate').value = client.dealClosedDate;
+                    document.getElementById('reason').value = client.reason;
+                    document.getElementById('notes').value = client.notes;
+                    document.getElementById('salesRep').value = client.salesRep;
+                    document.getElementById('employeeCode').value = client.employeeCode;
+                    document.getElementById('branch').value = client.branch;
+                    clients.splice(index, 1);
+                    localStorage.setItem('clients', JSON.stringify(clients));
+                    renderClients();
+                    if (client.clientSource === 'ميداني') {
+                        fieldVisitDetails.style.display = 'block'; // إظهار حقول الميداني عند التعديل
+                    } else {
+                        fieldVisitDetails.style.display = 'none'; // إخفاء حقول الميداني عند التعديل
+                    }
+                }
+            });
+
+            renderClients();
+
+            document.getElementById('exportExcelBtn').addEventListener('click', function() {
+                const table = document.querySelector('table');
+                const workbook = XLSX.utils.table_to_book(table);
+                XLSX.writeFile(workbook, 'clients.xlsx');
+            });
+
+            document.getElementById('viewReportBtn').addEventListener('click', function() {
+                html2canvas(document.querySelector('table')).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const doc = new jsPDF();
+                    doc.addImage(imgData, 'PNG', 10, 10);
+                    doc.save('report.pdf');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
